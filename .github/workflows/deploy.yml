@@ -1,0 +1,75 @@
+# mainへのpushでstagingへ自動デプロイ・検証し、productionはworkflow_dispatch +
+# GitHub Environment(production)のrequired reviewers承認を経てのみデプロイする。
+# 認証はservice principal + Workload Identity Federation(OIDC)。長期PATを使わない。
+# 事前設定:
+#   - GitHub Environments: staging / production を作成し、productionにrequired reviewersを設定
+#   - 各Environmentのvariables: DATABRICKS_HOST, DATABRICKS_CLIENT_ID
+#   - Databricks側: service principalにfederation policyを設定
+# このファイルはエージェントによる自動編集が禁止されている(hooks/CODEOWNERSで保護)。
+name: Deploy Databricks bundle
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_production:
+        description: staging検証済みのmain最新コミットをproductionへデプロイする
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: databricks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: databricks/setup-cli@main
+      - run: uv sync --all-groups --locked
+      - run: uv run task check
+      - run: databricks bundle validate -t staging
+      - run: databricks bundle deploy -t staging --auto-approve
+      # 検証対象のJob keyはresources/*.ymlに合わせて変更する
+      - run: databricks bundle run main_job -t staging
+      - run: uv run task integration
+      - run: databricks bundle summary -t staging
+
+  production:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.deploy_production
+    needs: staging
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABRICKS_AUTH_TYPE: github-oidc
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ vars.DATABRICKS_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: databricks/setup-cli@main
+      - run: uv sync --all-groups --locked
+      - run: databricks bundle validate -t prod
+      - run: databricks bundle deploy -t prod --auto-approve
+      - run: databricks bundle summary -t prod

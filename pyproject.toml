@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sample-job"
+version = "0.1.0"
+description = "Databricks Job (rename this project at /01-design-intake)"
+requires-python = ">=3.11,<3.13"
+dependencies = []
+
+[project.scripts]
+main_job = "sample_job.main:main"
+
+[dependency-groups]
+dev = [
+  "databricks-sdk>=0.85.0,<1",
+  "mypy>=1.16,<2",
+  "pytest>=8.4,<9",
+  "pytest-cov>=6.2,<7",
+  "ruff>=0.12,<1",
+  "taskipy>=1.14,<2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sample_job"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --cov=sample_job --cov-report=term-missing"
+testpaths = ["tests"]
+markers = ["integration: requires a deployed Databricks test environment"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", "dist", "build", "参考"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["sample_job"]
+mypy_path = "src"
+
+[tool.taskipy.tasks]
+format = "ruff format ."
+lint = "ruff check ."
+typecheck = "mypy src"
+test = 'pytest -m "not integration"'
+integration = 'pytest -m "integration" --no-cov'
+check = "task format && task lint && task typecheck && task test"
+build = "uv build --wheel"

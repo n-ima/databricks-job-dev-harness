@@ -1,0 +1,38 @@
+# PRとmainへのpushで品質ゲートを実行する。
+# このファイルはハーネスの運用ルールの一部であり、エージェントによる自動編集は禁止
+# (.github/hooks/guard-harness-config-edit と CODEOWNERS で保護)。
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: uv sync --all-groups --locked
+      - run: uv run ruff format --check .
+      - run: uv run task lint
+      - run: uv run task typecheck
+      - run: uv run task test
+      - run: uv run task build
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2

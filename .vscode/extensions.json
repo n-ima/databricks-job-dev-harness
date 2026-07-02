@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "github.copilot",
+    "github.copilot-chat",
+    "github.vscode-pull-request-github",
+    "databricks.databricks",
+    "charliermarsh.ruff",
+    "ms-python.python",
+    "redhat.vscode-yaml"
+  ]
+}

@@ -1,0 +1,9 @@
+# ハーネス自体の運用ルールへの変更に人間のレビューを必須にするテンプレート。
+# ブランチ保護と組み合わせて使う。チーム名は組織に合わせて書き換えること。
+/.github/agents/     @your-org/platform-owners
+/.github/hooks/      @your-org/platform-owners
+/.github/workflows/  @your-org/platform-owners
+/AGENTS.md           @your-org/platform-owners
+/plugin.json         @your-org/platform-owners
+/databricks.yml      @your-org/data-platform-owners
+/resources/          @your-org/data-platform-owners

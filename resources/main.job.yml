@@ -1,0 +1,50 @@
+# Jobリソース定義の雛形。1リソース1ファイルで resources/ 配下に置く。
+# schedule はIRRでtimezone・pause状態・SLA・同時実行・backfill方針が承認されてから追加する。
+# compute の選択(classic/serverless)はIRRの決定を使う。serverlessにする場合は
+# job_clusters と tasks[].job_cluster_key を削除し、代わりに以下を使う:
+#   environments:
+#     - environment_key: default
+#       spec:
+#         environment_version: "3"
+#   tasks[].environment_key: default   # (python_wheel_taskはそのまま)
+resources:
+  jobs:
+    main_job:
+      name: sample-job-main
+      description: Managed by Databricks Asset Bundles. Do not edit in the UI.
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+      queue:
+        enabled: true
+      email_notifications:
+        on_failure:
+          - ${var.notification_email}
+        no_alert_for_skipped_runs: true
+      job_clusters:
+        - job_cluster_key: default_cluster
+          new_cluster:
+            spark_version: ${var.spark_version}
+            node_type_id: ${var.node_type_id}
+            num_workers: 1
+            data_security_mode: SINGLE_USER
+            custom_tags:
+              project: ${bundle.name}
+              environment: ${bundle.target}
+      tasks:
+        - task_key: transform
+          job_cluster_key: default_cluster
+          python_wheel_task:
+            package_name: sample_job
+            entry_point: main_job
+            named_parameters:
+              environment: ${bundle.target}
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+          libraries:
+            - whl: ../dist/*.whl
+          max_retries: 2
+          min_retry_interval_millis: 60000
+          retry_on_timeout: true
+      permissions:
+        - level: CAN_VIEW
+          group_name: ${var.job_viewer_group}

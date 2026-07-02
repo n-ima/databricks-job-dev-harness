@@ -1,0 +1,82 @@
+# Databricks Asset Bundle定義。このファイルとresources/*.ymlがDatabricksリソースの唯一の正。
+# UIでJob・権限・スケジュールを恒久変更しない。
+# 環境固有値はvariablesとtargetsに置き、コードへ直書きしない。
+bundle:
+  name: sample-job
+
+include:
+  - resources/*.yml
+
+artifacts:
+  default:
+    type: whl
+    build: uv build --wheel
+    path: .
+
+variables:
+  catalog:
+    description: Unity Catalog catalog name
+  schema:
+    description: Unity Catalog schema name
+  spark_version:
+    description: Databricks Runtime version approved by the platform team
+    default: "15.4.x-scala2.12"
+  node_type_id:
+    description: Cloud-specific worker node type approved by the platform team
+    default: "CHANGE_ME"
+  notification_email:
+    description: Operations notification address
+    default: "CHANGE_ME@example.com"
+  job_viewer_group:
+    description: Least-privileged group allowed to view job runs
+    default: "CHANGE_ME"
+  run_service_principal:
+    description: Environment-specific service principal application ID used to run jobs
+    default: "CHANGE_ME"
+
+sync:
+  exclude:
+    - .venv
+    - .git
+    - .env
+    - docs
+    - tests
+
+targets:
+  dev:
+    default: true
+    mode: development
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: dev_catalog
+      schema: ${workspace.current_user.short_name}_sample_job
+
+  staging:
+    mode: production
+    run_as:
+      service_principal_name: ${var.run_service_principal}
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: staging_catalog
+      schema: sample_job
+    presets:
+      name_prefix: "[staging] "
+      tags:
+        environment: staging
+        managed_by: asset-bundles
+
+  prod:
+    mode: production
+    run_as:
+      service_principal_name: ${var.run_service_principal}
+    workspace:
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: prod_catalog
+      schema: sample_job
+    presets:
+      tags:
+        environment: production
+        managed_by: asset-bundles

@@ -1,0 +1,28 @@
+{
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests/unit"],
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/databricks/cli/main/bundle/schema/jsonschema.json": [
+      "databricks.yml",
+      "resources/*.yml"
+    ]
+  },
+  "chat.useAgentsMdFile": true,
+  "github.copilot.chat.skillTool.enabled": true,
+  "chat.hookFilesLocations": {
+    ".github/hooks": true
+  },
+  "chat.tools.edits.autoApprove": {
+    ".github/hooks/**": false,
+    ".github/agents/**": false,
+    ".github/workflows/**": false,
+    "AGENTS.md": false,
+    "plugin.json": false,
+    "databricks.yml": false,
+    "resources/**": false
+  }
+}

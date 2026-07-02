@@ -1,0 +1,9 @@
+{
+  "name": "databricks-job-dev-harness",
+  "version": "1.0.0",
+  "description": "Databricks Job開発をGitHub Copilotでオーケストレーションする開発ハーネス（設計書チェック→実装→テスト→リリース）",
+  "agents": ".github/agents",
+  "skills": ".github/skills",
+  "commands": ".github/prompts",
+  "hooks": ".github/hooks"
+}
