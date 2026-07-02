@@ -19,9 +19,15 @@ databricks bundle validate -t dev
    変更箇所のチェックリストは `.github/skills/databricks-env-setup/SKILL.md` の
    「プロジェクトリネーム」節を参照（この場で手動でやらなくても、`/01-design-intake` で
    名前を決めて記録し、実装フェーズのT-000タスクとしてエージェントに任せられる）。
-4. （推奨）Databricks公式Agent Skills / AI Dev Kit を導入する
+4. （標準）Databricks公式Agent Skills / AI Dev Kit を導入する
    （`databricks-env-setup` Skill参照。バージョンを固定し、導入は専用PRにする）。
    MCPサーバーを使う場合は `.vscode/mcp.json.example` を `mcp.json` にコピーして設定する。
+   - **役割分担に注意**: Databricksの「操作」（deploy/run）の正は常にCLI + Asset Bundles
+     （フックで検査でき、CI/CDと同一コマンドで再現できるため）。AI Dev Kitが担うのは
+     「知識と調査」— 正しいBundle構文の供給（Agent Skills）と、テーブルスキーマや
+     Job実行状態のChat内調査（MCP）。導入すると実装・テスト失敗調査の往復が大きく減る。
+   - ハーネスに同梱していないのは更新が速く焼き込むと陳腐化するため（DECISIONS D-009）。
+     組織ポリシー等で導入できない場合は、その旨を `environment.md` のAIツール構成に記録する。
 5. GitHub Copilot Chat にサインインし、Chatビューのagentセレクタに
    `orchestrator` 等が表示されることを確認する。
 6. （CI/CDを使う場合）GitHubリポジトリに `staging` / `production` Environmentsを作成し、
@@ -136,6 +142,33 @@ CRITICAL/HIGHがあれば自動で実装に差し戻される。
 ハーネス改善分を提案表にする。採用した改善はハーネス本体リポジトリに人間が適用し、
 `DECISIONS.md` に記録する。
 
+## 6. リリース後の機能改修・バグ修正
+
+改修も新規開発と同じゲートを通るが、**常に差分駆動**で行う。全設計書の再チェックや
+全タスクの見直しはしない（トークンと時間の無駄）。影響範囲は
+`docs/02-implementation/traceability.md`（設計ID→実装→テスト）から機械的に辿る。
+改修サイクルの開始時に、`GATE_STATUS` の該当フェーズを `in_progress` へ戻す
+（`gate-check` スキル参照）。起点は2つに分かれる。
+
+### A. 設計変更を伴う改修（機能追加・仕様変更）
+
+1. 設計書を設計工程（ハーネスの外）で修正・承認する。
+2. `design-index.md` の該当設計IDの版・承認日を更新する（新機能なら行を追加）。
+3. `/02-design-check` を実行する。design-criticとIRRは**変更された設計IDに関する
+   項目だけ**を再判定する（`design-readiness-review` スキルの「再判定」節）。
+   全項目のやり直しはしない。
+4. `/03-implementation-plan` で該当設計IDのタスクだけを `tasks.md` に追記する。
+5. 以降は通常どおり `/04` → `/05` → `/06`。テストは影響のある受け入れ条件 + 回帰
+   （`uv run task check` は常に全体が走るので回帰は自動的に担保される）に絞る。
+
+### B. 設計変更を伴わないバグ修正（実装が設計とずれていた）
+
+設計書は正しいので設計書の修正もIRRの再判定も不要。
+
+1. `tasks.md` に修正タスクを1行追記し、**再現テストを先に追加**して失敗を確認する。
+2. 最小修正で通し、`uv run task check` で回帰確認する。
+3. `/05-test`（影響範囲のdev検証）→ `/06-release`。
+
 ## セッション運用の原則
 
 - **フェーズが変わったら New Chat**。特に設計書チェック・独立レビューは
@@ -159,6 +192,17 @@ A. ハーネスとしては推奨しない（NO-GO = 推測実装になる状態
 **Q. devデプロイまで勝手にやってほしくない。**
 A. `docs/01-design/environment.md` の自動化境界で「devデプロイは人手」と明示すれば、
 エージェントはそれに従う（フェーズの既定より environment.md の明示が優先）。
+
+**Q. 障害対応でどうしようもなく、設計書を直さずコードを直接修正した（したい）。**
+A. 緊急のroll-forwardとして許容される。ただし2つの原則を守ること。
+1. **緊急でも省略しないもの**: 再現テスト・PR・人の承認・記録
+   （`AGENTS.md` / releaseエージェントの方針。Hooksもこれらを免除しない）。
+2. **乖離を機械的に追跡する**: 修正と同時に
+   `design-index.md` の該当設計IDの状態を「実装乖離あり（解消期限: YYYY-MM-DD）」にし、
+   `learnings.md` に1行追記する（SessionStartフックで全セッションに注入され、
+   忘れられなくなる）。期限までに設計書を正式に更新して版を上げ、状態を戻す。
+   乖離が未解消の間、次の `/02-design-check` は該当設計IDを `CONDITIONAL GO` の
+   条件として扱う。**「絶対禁止」にしない代わりに「黙って乖離したまま」を禁止**している。
 
 **Q. 既存のJobリポジトリに後からこのハーネスを入れたい。**
 A. `.github/`・`docs/`・`AGENTS.md` をコピーし、`databricks.yml` は既存のものを正とする。

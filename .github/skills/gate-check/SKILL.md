@@ -35,5 +35,9 @@ release: not_started | in_progress | pending_approval | done
    `done` にする）。「未着手/進行中」への修正は機械的に判断できるため確認不要。
 4. `design_check` が `done` でない間は、implementation以降のフェーズを開始しない
    （`AGENTS.md` の「IRRが未判定またはNO-GOの間、プロダクションコードを実装しない」に対応）。
+5. **リリース後の改修サイクル**: 改修の起点に応じて該当フェーズを `in_progress` へ戻す
+   （設計変更あり→ `design_check` から / 設計変更なしのバグ修正→ `implementation` から）。
+   戻すのは該当フェーズ以降のみで、前段のフェーズは `done` のまま維持する。
+   改修理由と対象設計IDを `progress.md` の申し送りに1行記録する。
 5. `.github/hooks/scripts/` のゲート系フックはこのGATE_STATUSブロックを直接パースするため、
    フォーマット（インデント・キー名）を崩さない。
