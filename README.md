@@ -77,6 +77,7 @@ VS Code + GitHub Copilot で、Databricks Job（Lakeflow Jobs）の
 |---|---|---|---|---|
 | - | 進捗確認 | `/00-start-project`, `/99-status` | orchestrator | `docs/00-overview/progress.md` |
 | 1 | 設計書登録 | `/01-design-intake` | design-gate | `docs/01-design/design-index.md`, `environment.md` |
+| 1.5 | 設計改訂（任意） | `/08-design-revise` | design-gate | 対話で合意した設計変更の反映 + 索引の版更新（初回の下書き仕上げ・改修時の設計修正に使う） |
 | 2 | 設計書チェック | `/02-design-check` | design-gate（→ `design-critic`を判定前に1回） | `docs/01-design/irr.md`（GO/CONDITIONAL GO/NO-GO） |
 | 3 | 実装計画 | `/03-implementation-plan` | implement | `docs/02-implementation/tasks.md`, `traceability.md` |
 | 4 | 実装 | `/04-implement-task` | implement（→ `task-worker`をタスクごとに呼び出し） | `src/` + `tests/unit/` |
