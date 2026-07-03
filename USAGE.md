@@ -5,7 +5,25 @@
 
 ## 0. 初回セットアップ（プロジェクト開始ごとに1回）
 
-1. このリポジトリをテンプレートとして新しいリポジトリを作り、VS Codeで開く。
+1. ハーネスを入手し、**案件用の新しいリポジトリ**としてVS Codeで開く。入手方法は3通り
+   （いずれの場合も、以後のpush先はこのハーネスのリポジトリではなく案件リポジトリになる）。
+
+   - **GitHubテンプレート**: ハーネスのリポジトリで「Use this template」から案件リポジトリを作る。
+   - **ZIP配布**: 受け取ったZIPを案件フォルダに展開し、案件リポジトリとして初期化する。
+
+     ```bash
+     git init -b main
+     git add -A && git commit -m "chore: 開発ハーネスを導入"
+     git remote add origin https://github.com/<org>/<案件リポジトリ>.git   # 案件のURL
+     git push -u origin main
+     ```
+
+   - **既存リポジトリへの導入**: 後述のFAQ参照。
+
+   > **ZIPを作って配る側へ**: 作業フォルダをそのまま圧縮しないこと。`.git`（ハーネスの
+   > リポジトリを指すremoteを含む）や `.venv`/`dist` が混入し、展開先から誤って
+   > ハーネス本体へpushされる事故につながる。追跡ファイルだけを含む安全なZIPは
+   > `git archive --format=zip -o ../databricks-job-dev-harness.zip HEAD` で作る。
 2. ターミナルで環境を確認する（詳細は `.github/skills/databricks-env-setup/SKILL.md`）。
 
 ```bash
