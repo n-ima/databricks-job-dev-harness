@@ -2,8 +2,9 @@
   "_comment": [
     "MCPサーバー設定の例。使う場合はこのファイルを mcp.json にコピーして値を埋める。",
     "mcp.json はマシン固有・認証依存のためコミットしない(.gitignore済み)。",
-    "Databricks公式のMCPサーバー(AI Dev Kit)の最新の導入コマンドは",
-    "https://github.com/databricks/ai-dev-kit の公式READMEで必ず確認し、",
+    "Databricks公式のMCPサーバー(AI Dev Kit: 50以上のワークスペース操作ツールを提供)の",
+    "最新の導入コマンドは https://github.com/databricks-solutions/ai-dev-kit の",
+    "公式READMEで必ず確認し、",
     "バージョンを固定して docs/01-design/environment.md に記録すること。",
     "MCPに与えるDatabricks権限は開発用プロファイル(dev)の最小権限とする。"
   ],

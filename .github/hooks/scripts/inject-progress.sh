@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# SessionStart hook: フェーズゲート状況(GATE_STATUS)・IRR判定・教訓ログ(learnings)を
-# 会話開始時に自動注入する。
+# SessionStart / PreCompact hook: フェーズゲート状況(GATE_STATUS)・IRR判定・
+# 教訓ログ(learnings)を会話開始時に自動注入する。PreCompactでも同じ内容を再注入し、
+# コンテキスト圧縮でゲート状態・IRR判定が失われないようにする。
+# 第1引数でイベント名を受け取る(既定: SessionStart)。
+event="${1:-SessionStart}"
 progress="docs/00-overview/progress.md"
 irr="docs/01-design/irr.md"
 learnings="docs/00-overview/learnings.md"
@@ -34,4 +37,4 @@ if [[ -f "$learnings" ]]; then
 fi
 
 esc=$(printf '%b' "$ctx" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
-printf '{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "%s"}}\n' "$esc"
+printf '{"hookSpecificOutput": {"hookEventName": "%s", "additionalContext": "%s"}}\n' "$event" "$esc"

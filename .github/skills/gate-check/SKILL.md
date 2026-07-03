@@ -39,5 +39,17 @@ release: not_started | in_progress | pending_approval | done
    （設計変更あり→ `design_check` から / 設計変更なしのバグ修正→ `implementation` から）。
    戻すのは該当フェーズ以降のみで、前段のフェーズは `done` のまま維持する。
    改修理由と対象設計IDを `progress.md` の申し送りに1行記録する。
+
+## 横断整合監査（ユーザーが「整合チェック」「監査」を求めたとき）
+
+フェーズ判定より深い、成果物間の食い違いの検出。改修が数回重なった後や
+リリース前の最終確認に有効。次を突き合わせ、食い違いを表で報告する（修正はしない）。
+
+1. `design-index.md` の設計ID・版 ↔ `irr.md` に記載の版（IRRが古い版を見ていないか）
+2. `design-index.md` の「実装乖離あり」状態 ↔ 解消期限切れがないか
+3. `tasks.md` の全タスク ↔ `traceability.md` の行（対応漏れ・テスト欄が空の行）
+4. `traceability.md` の実装ファイル・テスト ↔ 実在するか（削除・リネーム漏れ）
+5. `GATE_STATUS` ↔ 各成果物の実態（通常判定と同じ）
+6. `CONDITIONAL GO` の条件 ↔ `tasks.md` 上の追跡タスクの有無と期限
 5. `.github/hooks/scripts/` のゲート系フックはこのGATE_STATUSブロックを直接パースするため、
    フォーマット（インデント・キー名）を崩さない。

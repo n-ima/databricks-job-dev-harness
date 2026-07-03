@@ -10,6 +10,7 @@ Hooksはモデルを介さないシェル実行であり、ほぼゼロコスト
 |---|---|---|
 | `gate-hooks.json` | PreToolUse | `guard-template-edit`（`*_template.md` 直接編集をdeny）/ `guard-dangerous-git`（push/tag/force/rm -rf をask）/ `guard-databricks-prod`（下記） |
 | | SessionStart | `inject-progress`（GATE_STATUS + **IRR判定** + 教訓ログを自動注入） |
+| | PreCompact | `inject-progress PreCompact`（コンテキスト圧縮でゲート状態・IRR判定・教訓が失われないよう同じ内容を再注入） |
 | | PostToolUse | `warn-stale-gate`（承認済み文書の編集を検知して非ブロッキング警告） |
 | `security-hooks.json` | PreToolUse | `guard-harness-config-edit`（agents/hooks/workflows/AGENTS.md等の編集をdeny）/ `guard-secret-leak`（Databricks PAT `dapi...` 等の高確度パターンをdeny、汎用パターンをask） |
 

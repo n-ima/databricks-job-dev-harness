@@ -179,3 +179,33 @@
   フェーズごとに切るより継続の方が運用が単純。ただし同一セッションは毎ターン履歴を
   再送するため無限に安くはなく、「いつ切るべきか」が曖昧だとユーザーが判断できない
   （ユーザー指摘）。数値目安を置き、エージェント側からも区切りを提案するようにした。
+
+## D-019: 全エージェントにナビゲーション責務（メタガイダンス）を持たせる
+
+- **判断**: 全エージェントは応答末尾に「次の一手 + 新チャットにすべきか」を案内し、
+  フェーズ違いの依頼は正しい入口へ誘導し、セッション切り替えを自分から提案する
+  （AGENTS.md「ナビゲーション責務」）。使い方の質問専用に `/09-harness-help` +
+  `harness-guide` スキルを追加。
+- **根拠**: ハーネスの価値は正しく使われて初めて出る。操作手順を人が暗記する前提は
+  スケールしない（ユーザー要望）。案内ロジックをスキルに集約し、各エージェントには
+  「案内する義務」だけを置くことで、指示の重複とコンテキスト消費を抑えた。
+
+## D-020: 2026年7月の他ハーネス・公式機能調査に基づく採用/見送り
+
+- **調査対象**: GitHub Spec Kit、BMAD Method、Kiro、GSD、VS Code Copilot公式の
+  Hooks/Custom Agents/Skills/Plugins最新仕様、Databricks AI Dev Kit / Agent Skills公式。
+- **採用**:
+  - `PreCompact` フックでGATE_STATUS/IRR/教訓を再注入（圧縮でゲート状態が失われる穴を
+    塞ぐ。公式Hooks仕様の8イベント中、従来3つしか使っていなかった）
+  - Spec Kit `/analyze` 相当の横断整合監査を `gate-check` スキル + `/99-status` に追加
+  - Kiro由来のEARS記法をdesign-criticの指摘（書き直し例）に採用
+  - `aitools` の正確なスキル構成（8種、core/dabs/jobsが中核）とコマンドを
+    `databricks-env-setup` に反映。AI Dev Kitのリポジトリは
+    **databricks-solutions/ai-dev-kit**（旧記載の databricks/ai-dev-kit は誤り）
+- **見送り**:
+  - agent-scoped hooks（.agent.md frontmatter定義）— workspace hooks（.github/hooks/）に
+    一元管理する方が保護対象の見通しがよく、ハーネス設定保護フックの対象も1箇所で済む
+  - BMAD型の多エージェント化 — コスト対効果が合わない（D-007の3経路を維持）
+  - Spec Kit `taskstoissues`（GitHub Issues連携）— D-011の軽量方針を維持
+  - Autopilot（公開プレビュー）— 採用ではなく「Hooksのask有効を確認して使う」注意つき
+    案内に留める（harness-guideスキル）

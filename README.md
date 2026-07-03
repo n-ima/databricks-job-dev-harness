@@ -84,6 +84,10 @@ VS Code + GitHub Copilot で、Databricks Job（Lakeflow Jobs）の
 | 5 | テスト | `/05-test` | test（→ `reviewer`をsubagent呼び出し） | devデプロイ・Job実行 + `docs/03-test/test-report.md` |
 | 6 | リリース | `/06-release` | release | staging/prodデプロイ + `docs/04-release/` |
 | 7 | 振り返り | `/07-retrospective` | orchestrator | `docs/05-retrospective/retrospective.md` |
+| - | 使い方ヘルプ | `/09-harness-help` | orchestrator | 次の一手・セッション運用・コストの案内（`harness-guide` スキル） |
+
+エージェント自身が使い方を案内する（応答末尾に「次の一手 + 新チャットにすべきか」を
+添える、フェーズ違いの依頼は正しい入口へ誘導する等。AGENTS.mdの「ナビゲーション責務」）。
 
 IRRの承認（2→3）以降は、フェーズ間の `send: true` ハンドオフにより
 実装→テストがノンストップでつながる（真のブロッカー・Hooksによる`ask`確認・
@@ -191,6 +195,19 @@ docs/
   （Copilot coding agent, Claude Code等）でも同じルールが効くようにする。
 - **トークンコストを意識**: 高頻度・機械的なフェーズは `model: auto`、
   一度の判断ミスが高くつくフェーズ（設計書チェック・独立レビュー）は強いモデルを検討する。
+
+## 他の開発ハーネス・手法との位置づけ（2026年7月調査）
+
+| 手法 | 特徴 | このハーネスとの関係 |
+|---|---|---|
+| [GitHub Spec Kit](https://github.com/github/spec-kit)（スペック駆動開発） | constitution→specify→plan→tasks→implementの汎用SDDワークフロー | 思想は同じ「仕様が正、コードは生成物」。Spec Kitは仕様をAIと書く前提だが、本ハーネスは**承認済み設計書が別工程から来る企業開発**に合わせ、設計書チェック(IRR)をゲートにした。Spec Kitの`/analyze`（成果物間整合チェック）相当は`/99-status`の横断整合監査として取り込み済み |
+| BMAD Method（12+エージェントのアジャイルチーム模倣） | Analyst/PM/Architect/QA等のフルロールプレイ | 上流(要件・設計)までAIで担う思想。本ハーネスは上流を人間の設計工程に置き、エージェントを8体・サブエージェント経路3本に絞ってコストを制御 |
+| Kiro（AWSのスペック駆動IDE） | EARS記法要求への変換と実装の追跡 | EARS記法はdesign-criticの指摘（書き直し例の提示）に採用 |
+| [Databricks AI Dev Kit](https://github.com/databricks-solutions/ai-dev-kit) / Agent Skills | 公式スキル8種 + MCP 50ツール | 競合ではなく部品。操作の正はCLI+Bundles（フックで検査可能）とし、Dev Kitは知識・調査層として標準導入（`databricks-env-setup`スキル） |
+
+本ハーネス固有の強み: **設計書チェック（IRR）の機械可読ゲート**（フックがNO-GOを
+毎セッション注入）、**本番保護の三重化**（Hooks + GitHub Environments + Databricks権限分離）、
+**乖離追跡つきホットフィックス**、**改修の差分駆動**、**成長ループ**（learnings/振り返り/DECISIONS）。
 
 ## 既知の制約・要検証事項
 

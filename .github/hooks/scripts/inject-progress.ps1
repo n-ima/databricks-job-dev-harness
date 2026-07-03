@@ -1,5 +1,8 @@
-﻿# SessionStart hook: フェーズゲート状況(GATE_STATUS)・IRR判定・教訓ログ(learnings)を
-# 会話開始時に自動注入する。
+﻿# SessionStart / PreCompact hook: フェーズゲート状況(GATE_STATUS)・IRR判定・
+# 教訓ログ(learnings)を会話開始時に自動注入する。PreCompactでも同じ内容を再注入し、
+# コンテキスト圧縮でゲート状態・IRR判定が失われないようにする。
+# 第1引数でイベント名を受け取る(既定: SessionStart)。
+param([string]$EventName = "SessionStart")
 $ErrorActionPreference = 'SilentlyContinue'
 $progress = "docs/00-overview/progress.md"
 $irr = "docs/01-design/irr.md"
@@ -46,7 +49,7 @@ if (Test-Path $learnings) {
 
 $out = @{
   hookSpecificOutput = @{
-    hookEventName = "SessionStart"
+    hookEventName = $EventName
     additionalContext = $ctx
   }
 }

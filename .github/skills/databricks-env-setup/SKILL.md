@@ -49,13 +49,25 @@ databricks bundle validate -t dev                     # Bundle疎通確認
 
 ## Databricks Agent Skills / AI Dev Kit の導入（推奨）
 
-Databricks公式のAIツール群。**導入時は公式一次情報（docs.databricks.com、
-github.com/databricks/ai-dev-kit）で最新の手順・コマンド体系を確認すること**
-（活発に更新されており、コマンドが変わっている可能性がある）。
+Databricks公式のAIツール群。**導入時は公式一次情報（docs.databricks.com の
+Agent Skillsページ、github.com/databricks-solutions/ai-dev-kit）で最新の手順を
+確認すること**（活発に更新されており、コマンド・スキル構成が変わっている可能性がある）。
 
-1. **Databricks Agent Skills**（CLI同梱の `aitools`）: Bundles等の製品構文の
-   一般知識をエージェントに供給する。プロジェクトスコープで導入し、
-   更新確認（例: `databricks aitools update --check --scope project`）は専用PRでレビューする。
+1. **Databricks Agent Skills**（CLI同梱の `aitools` コマンド群）: 製品構文・
+   ベストプラクティスの一般知識をエージェントに供給するMarkdownスキル集。
+   2026年7月時点の構成: `databricks-core`（基本）/ `databricks-dabs`（Bundle）/
+   `databricks-jobs`（Job開発）/ `databricks-pipelines`（DLT）/ `databricks-apps` /
+   `databricks-lakebase` / `databricks-model-serving` / `databricks-serverless-migration`。
+   このハーネスでは **`databricks-core` + `databricks-dabs` + `databricks-jobs`** が中核。
+
+   ```bash
+   databricks aitools install --scope project   # 導入(CLIが対応エージェントを自動検出)
+   databricks aitools list                      # 導入済みスキルの確認
+   databricks aitools update --check --scope project   # 更新の事前確認(適用は専用PRで)
+   ```
+
+   スコープはグローバル（`~/.databricks/aitools/skills/`、既定）とプロジェクトが選べる。
+   チームで差が出ないよう**projectスコープ + 専用PRでのレビュー**を標準とする。
 2. **AI Dev Kit（MCPサーバー等）**: ワークスペース操作（テーブル・スキーマ参照、
    Job実行状態の確認、SQL実行など）をエージェントのツールとして供給する。
    これを入れると「テーブルのスキーマを見ながら実装」「Job失敗のrunを直接調査」が
