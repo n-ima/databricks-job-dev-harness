@@ -13,11 +13,29 @@
 | `design-docs/detailed-design/features/DD-004_export.md` | レポート出力（AC-401〜403） |
 | `test-data/sales_20260701.csv` | 検証用入力データ（正常9行 + 不正6行） |
 
+## テストの場所（重要）
+
+**ハーネス本体リポジトリやそのブランチの上でテストしない。** 実装するとテンプレートが
+「実装済みプロジェクト」に変質し、配布物が汚れる。必ず**配布経路（ZIP/テンプレート）で
+作った別のプロジェクトフォルダ**で行う。こうするとハーネスの検証と同時に
+配布手順そのものの検証にもなる。
+
+```bash
+# ハーネス本体リポジトリで: 配布物を作り、隣に検証プロジェクトを展開する
+git archive --format=zip -o ../databricks-job-dev-harness.zip HEAD
+mkdir ../daily-sales-report-trial && cd ../daily-sales-report-trial
+unzip ../databricks-job-dev-harness.zip
+git init -b main && git add -A && git commit -m "chore: 開発ハーネスを導入"
+```
+
+テストで見つかった改善は、検証プロジェクト側で `/07-retrospective` を実行して
+改善提案表にまとめ、**人間がハーネス本体リポジトリに適用して `DECISIONS.md` に記録**する
+（ハーネスの成長ループそのもの。検証プロジェクトは使い捨ててよい）。
+
 ## テスト手順
 
-1. **案件リポジトリを用意する**（USAGE.md 0節。テンプレート/ZIPから作成。
-   ハーネス本体リポジトリの上で直接試す場合は、終了後に `git clean` で戻すこと）。
-2. サンプル設計書を配置する:
+1. 上記の手順で検証プロジェクトを作り、VS Codeで開く。
+2. サンプル設計書を配置する（samplesはZIPに同梱されている）:
 
    ```bash
    cp samples/design-docs/basic-design/*.md docs/01-design/basic-design/

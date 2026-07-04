@@ -3,3 +3,6 @@
 *.sh text eol=lf
 # PowerShell 5.1はUTF-8 BOM付き前提(BOMはファイル内容として保持される)
 *.ps1 text
+# samples/(動作確認用サンプル設計書)は既定で配布物(git archive)に含める。
+# 受領側の環境検証に使えるため。除外したい場合は次の行を有効化する:
+# samples/ export-ignore
