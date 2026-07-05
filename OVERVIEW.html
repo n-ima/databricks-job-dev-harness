@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>databricks-job-dev-harness — 概要</title>
+<style>
+  :root{
+    --bg:#0b1220;
+    --bg-2:#121b2e;
+    --page:#f6f7fb;
+    --card:#ffffff;
+    --ink:#16202e;
+    --muted:#5b6b7f;
+    --line:#e3e8ef;
+    --accent:#ff6a3d;
+    --accent-soft:#fff1ea;
+    --teal:#0d9488;
+    --teal-soft:#e6f7f5;
+    --indigo:#4f46e5;
+    --indigo-soft:#edecfe;
+    --red:#e0433a;
+    --red-soft:#fdeceb;
+    --radius:16px;
+    --shadow:0 8px 24px rgba(16,24,40,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--page);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px;}
+  code, .mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:radial-gradient(1200px 500px at 15% -10%, #1c2b45 0%, var(--bg) 55%), var(--bg);
+    color:#eef2f8;
+    padding:72px 0 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.08) 0, transparent 60%),
+      radial-gradient(2px 2px at 80% 60%, rgba(255,255,255,0.06) 0, transparent 60%),
+      radial-gradient(2px 2px at 60% 15%, rgba(255,255,255,0.05) 0, transparent 60%);
+    pointer-events:none;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; font-weight:600; letter-spacing:.04em;
+    color:#ffb59c;
+    background:rgba(255,106,61,0.12);
+    border:1px solid rgba(255,106,61,0.35);
+    padding:6px 14px; border-radius:999px;
+    margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:38px; line-height:1.4; margin:0 0 18px; font-weight:800;
+    letter-spacing:-0.01em;
+    max-width:760px;
+  }
+  .hero p.lead{
+    font-size:16px; color:#b9c3d4; max-width:640px; margin:0 0 30px;
+  }
+  .chip-row{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:38px;}
+  .chip{
+    font-size:13px; font-weight:600; color:#dfe6f2;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.14);
+    padding:8px 14px; border-radius:10px;
+  }
+  .hero-links{display:flex; gap:18px; flex-wrap:wrap;}
+  .hero-links a{
+    color:#eef2f8; text-decoration:none; font-size:14px; font-weight:600;
+    border-bottom:1px solid rgba(255,255,255,0.3); padding-bottom:2px;
+  }
+  .hero-links a:hover{border-color:#ffb59c; color:#ffb59c;}
+
+  /* ---------- Sections ---------- */
+  main{padding:56px 0 20px;}
+  section{margin-bottom:64px;}
+  .section-head{max-width:680px; margin-bottom:28px;}
+  .kicker{
+    font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--accent);
+    text-transform:uppercase; margin-bottom:8px;
+  }
+  h2{font-size:25px; margin:0 0 10px; font-weight:800; letter-spacing:-0.01em;}
+  .section-head p{color:var(--muted); font-size:15px; margin:0;}
+
+  /* ---------- Problem cards ---------- */
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:760px){.compare{grid-template-columns:1fr;}}
+  .compare .card{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:26px 26px 22px; border-top:4px solid var(--line);
+  }
+  .compare .card.bad{border-top-color:#f0b4ab;}
+  .compare .card.good{border-top-color:var(--teal);}
+  .compare .card h3{
+    font-size:15px; margin:0 0 16px; display:flex; align-items:center; gap:8px;
+  }
+  .compare .card.bad h3{color:#c23c30;}
+  .compare .card.good h3{color:var(--teal);}
+  .compare ul{margin:0; padding:0; list-style:none;}
+  .compare li{
+    display:flex; gap:10px; font-size:14px; color:var(--ink); padding:9px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .compare li:last-child{border-bottom:none;}
+  .compare li svg{flex:none; margin-top:2px;}
+
+  /* ---------- Flow diagram ---------- */
+  .diagram-card{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:28px 20px 20px; overflow-x:auto;
+  }
+  .diagram-card svg{display:block; margin:0 auto; min-width:760px;}
+  .diagram-caption{
+    text-align:center; color:var(--muted); font-size:13px; margin-top:14px;
+  }
+
+  /* ---------- Layers ---------- */
+  .layer-list{display:flex; flex-direction:column; gap:14px;}
+  .layer-row{
+    background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+    padding:20px 24px; display:flex; align-items:center; gap:20px;
+    border-left:5px solid var(--line);
+  }
+  .layer-row.agents{border-left-color:var(--accent);}
+  .layer-row.skills{border-left-color:var(--teal);}
+  .layer-row.hooks{border-left-color:var(--indigo);}
+  .layer-icon{
+    flex:none; width:46px; height:46px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .layer-row.agents .layer-icon{background:var(--accent-soft); color:var(--accent);}
+  .layer-row.skills .layer-icon{background:var(--teal-soft); color:var(--teal);}
+  .layer-row.hooks .layer-icon{background:var(--indigo-soft); color:var(--indigo);}
+  .layer-text{flex:1;}
+  .layer-text .t{font-size:15px; font-weight:700; margin-bottom:4px;}
+  .layer-text .d{font-size:13.5px; color:var(--muted);}
+  .layer-path{
+    flex:none; font-size:12px; color:var(--muted); background:var(--page);
+    border:1px solid var(--line); padding:5px 10px; border-radius:8px;
+    white-space:nowrap;
+  }
+  @media (max-width:700px){
+    .layer-row{flex-wrap:wrap;}
+    .layer-path{margin-left:66px;}
+  }
+
+  /* ---------- Feature grid ---------- */
+  .feature-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:18px;
+  }
+  .feature-card{
+    background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+    padding:22px; display:flex; flex-direction:column; gap:12px;
+  }
+  .feature-num{
+    font-size:12px; font-weight:800; color:var(--muted); letter-spacing:.04em;
+  }
+  .feature-icon{
+    width:40px; height:40px; border-radius:10px; background:var(--accent-soft); color:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .feature-card h4{font-size:15.5px; margin:0; font-weight:700;}
+  .feature-card p{font-size:13.5px; color:var(--muted); margin:0;}
+  .loop-mini{margin-top:2px;}
+
+  /* ---------- Scope ---------- */
+  .scope-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:760px){.scope-grid{grid-template-columns:1fr;}}
+  .scope-card{
+    border-radius:var(--radius); padding:24px 26px; box-shadow:var(--shadow);
+  }
+  .scope-card.yes{background:var(--teal-soft); border:1px solid #bfe8e2;}
+  .scope-card.no{background:#f4f1fb; border:1px solid #ddd6f7;}
+  .scope-card h3{font-size:15px; margin:0 0 14px; display:flex; align-items:center; gap:8px;}
+  .scope-card.yes h3{color:#0b6e63;}
+  .scope-card.no h3{color:#5b4bb0;}
+  .scope-card ul{margin:0; padding-left:20px; font-size:14px;}
+  .scope-card li{margin-bottom:8px;}
+
+  /* ---------- Roadmap ---------- */
+  .roadmap{display:flex; gap:16px; flex-wrap:wrap;}
+  .road-step{
+    flex:1; min-width:200px; background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+    padding:20px; position:relative;
+  }
+  .road-step .n{
+    width:28px; height:28px; border-radius:50%; background:var(--ink); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;
+    margin-bottom:12px;
+  }
+  .road-step.current .n{background:var(--accent);}
+  .road-step h4{margin:0 0 6px; font-size:14.5px;}
+  .road-step p{margin:0; font-size:13px; color:var(--muted);}
+  .road-arrow{
+    display:flex; align-items:center; color:var(--line); flex:none;
+  }
+  @media (max-width:800px){.road-arrow{display:none;}}
+
+  footer{
+    padding:30px 0 50px; text-align:center; color:var(--muted); font-size:12.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 共通アイコン定義 -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+<symbol id="ic-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+<symbol id="ic-branch" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="12" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 8.4V15.6M8.2 6.9L15.6 10.7M8.2 17.1L15.6 13.3" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="ic-diff" viewBox="0 0 24 24"><path d="M3 8h13M12 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 16H8M12 20l-4-4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-loop" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.6-5.7M20 12a8 8 0 0 1-13.6 5.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3v4h-4M7 21v-4h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 9l-2 6-6 2 2-6 6-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="ic-scale" viewBox="0 0 24 24"><path d="M12 3v18M6 7h12M6 7L3 13a3 3 0 0 0 6 0L6 7zM18 7l-3 6a3 3 0 0 0 6 0l-3-6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-stack" viewBox="0 0 24 24"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+<symbol id="ic-doc" viewBox="0 0 24 24"><path d="M6 2h9l4 4v16H6V2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M15 2v4h4M9 12h6M9 16h6M9 8h2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="ic-refresh2" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M18 3v4.7h-4.7M6 21v-4.7h4.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="ic-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+</defs>
+</svg>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">GitHub Copilot × Databricks Jobs 開発ハーネス</span>
+    <h1>設計書チェックから始めて、<br>あとは安心して任せられる。</h1>
+    <p class="lead">
+      承認済みの設計書を渡すだけで、実装・テスト・リリースまでを一気通貫でオーケストレーション。
+      品質は機械可読なゲートで、コストはサブエージェント分離で、安全は三重の保護で担保します。
+    </p>
+    <div class="chip-row">
+      <span class="chip">設計品質ゲート（IRR）</span>
+      <span class="chip">本番保護の三重化</span>
+      <span class="chip">差分駆動の保守</span>
+      <span class="chip">使うほど賢くなる成長ループ</span>
+    </div>
+    <div class="hero-links">
+      <a href="README.md">全体構造 → README.md</a>
+      <a href="USAGE.md">使い方の手順 → USAGE.md</a>
+      <a href="DECISIONS.md">設計判断の背景 → DECISIONS.md</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ 課題感 ============ -->
+  <section>
+    <div class="section-head">
+      <div class="kicker">Why</div>
+      <h2>こんな迷い、ありませんか？</h2>
+      <p>AIコーディングは速い。しかしDatabricks Jobは無人で本番データに触り続ける。速さと安全さを両立する「型」がないと、結局は人の注意力に頼ることになる。</p>
+    </div>
+    <div class="compare">
+      <div class="card bad">
+        <h3><svg width="18" height="18"><use href="#ic-x"/></svg>ハーネスなしで進めると</h3>
+        <ul>
+          <li><svg width="16" height="16"><use href="#ic-x"/></svg>設計書の粒度がバラバラで、実装のたびに手戻りする</li>
+          <li><svg width="16" height="16"><use href="#ic-x"/></svg>誰が実装しても品質にムラが出る</li>
+          <li><svg width="16" height="16"><use href="#ic-x"/></svg>本番デプロイの確認が「気をつける」任せ</li>
+          <li><svg width="16" height="16"><use href="#ic-x"/></svg>緊急修正でコードだけ直し、設計書との食い違いに気づかない</li>
+          <li><svg width="16" height="16"><use href="#ic-x"/></svg>チャットが長くなるほど応答が遅く・的外れになる</li>
+        </ul>
+      </div>
+      <div class="card good">
+        <h3><svg width="18" height="18"><use href="#ic-check"/></svg>このハーネスを使うと</h3>
+        <ul>
+          <li><svg width="16" height="16" style="color:var(--teal)"><use href="#ic-check"/></svg>IRRが「実装可能な設計書か」を機械的にGO / NO-GOで判定</li>
+          <li><svg width="16" height="16" style="color:var(--teal)"><use href="#ic-check"/></svg>独立レビュー（design-critic / reviewer）が思い込みを検出</li>
+          <li><svg width="16" height="16" style="color:var(--teal)"><use href="#ic-check"/></svg>Hooks + GitHub Environments + 権限分離の三重で本番を保護</li>
+          <li><svg width="16" height="16" style="color:var(--teal)"><use href="#ic-check"/></svg>緊急修正は許容しつつ、設計との乖離を期限つきで追跡</li>
+          <li><svg width="16" height="16" style="color:var(--teal)"><use href="#ic-check"/></svg>セッションを分けるタイミングをエージェント自身が提案</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 全体の流れ ============ -->
+  <section>
+    <div class="section-head">
+      <div class="kicker">How it flows</div>
+      <h2>全体の流れ — 人が関わるのは要所だけ</h2>
+      <p>設計書チェックとproductionリリースの承認だけが人の判断ポイント。実装からテストまではノンストップの全自動区間として設計している。</p>
+    </div>
+    <div class="diagram-card">
+      <svg viewBox="0 0 1070 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0L10 5L0 10z" fill="#9aa7ba"/>
+          </marker>
+        </defs>
+
+        <!-- 全自動区間の帯 -->
+        <rect x="390" y="90" width="430" height="200" rx="18" fill="#0d9488" fill-opacity="0.08" stroke="#0d9488" stroke-opacity="0.35" stroke-dasharray="5 6"/>
+        <text x="410" y="112" font-size="13" font-weight="700" fill="#0d9488">全自動区間（人の逐一確認なし）</text>
+
+        <!-- 入力: 設計書 -->
+        <rect x="20" y="150" width="140" height="80" rx="10" fill="#fff" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 4"/>
+        <text x="90" y="185" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">承認済み</text>
+        <text x="90" y="203" text-anchor="middle" font-size="13" font-weight="700" fill="#475569">設計書</text>
+        <line x1="160" y1="190" x2="186" y2="190" stroke="#9aa7ba" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Stage A: 設計書チェック -->
+        <rect x="190" y="110" width="190" height="160" rx="14" fill="#fff" stroke="#ff6a3d" stroke-width="2.2"/>
+        <text x="285" y="145" text-anchor="middle" font-size="15" font-weight="800" fill="#1f2937">設計書チェック</text>
+        <text x="285" y="165" text-anchor="middle" font-size="11.5" fill="#6b7280">design-critic 独立レビュー</text>
+        <rect x="210" y="178" width="150" height="26" rx="13" fill="#fff1ea"/>
+        <text x="285" y="195" text-anchor="middle" font-size="10.5" font-weight="700" fill="#ff6a3d">GO / CONDITIONAL / NO-GO</text>
+        <use href="#ic-person" x="266" y="212" width="18" height="18" color="#94a3b8"/>
+        <text x="285" y="252" text-anchor="middle" font-size="11" fill="#94a3b8">人が厚く関わる</text>
+        <line x1="380" y1="190" x2="406" y2="190" stroke="#9aa7ba" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Stage B: 実装 -->
+        <rect x="410" y="110" width="180" height="160" rx="14" fill="#fff" stroke="#0d9488" stroke-width="2.2"/>
+        <text x="500" y="145" text-anchor="middle" font-size="15" font-weight="800" fill="#1f2937">実装</text>
+        <text x="500" y="165" text-anchor="middle" font-size="11.5" fill="#6b7280">task-worker が1タスクずつ</text>
+        <g font-size="10.5" font-weight="700" fill="#0d9488">
+          <rect x="440" y="182" width="26" height="26" rx="6" fill="#e6f7f5" stroke="#0d9488" stroke-width="1.2"/>
+          <text x="453" y="199" text-anchor="middle">1</text>
+          <rect x="487" y="182" width="26" height="26" rx="6" fill="#e6f7f5" stroke="#0d9488" stroke-width="1.2"/>
+          <text x="500" y="199" text-anchor="middle">2</text>
+          <rect x="534" y="182" width="26" height="26" rx="6" fill="#e6f7f5" stroke="#0d9488" stroke-width="1.2"/>
+          <text x="547" y="199" text-anchor="middle">3</text>
+        </g>
+        <line x1="466" y1="195" x2="486" y2="195" stroke="#0d9488" stroke-width="1.4" marker-end="url(#arrow)"/>
+        <line x1="513" y1="195" x2="533" y2="195" stroke="#0d9488" stroke-width="1.4" marker-end="url(#arrow)"/>
+        <text x="500" y="228" text-anchor="middle" font-size="10.5" fill="#94a3b8">1タスク＝1新規コンテキスト</text>
+        <text x="500" y="252" text-anchor="middle" font-size="11" fill="#94a3b8">ノンストップ</text>
+        <line x1="590" y1="190" x2="616" y2="190" stroke="#9aa7ba" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Stage C: テスト -->
+        <rect x="620" y="110" width="190" height="160" rx="14" fill="#fff" stroke="#0d9488" stroke-width="2.2"/>
+        <text x="715" y="145" text-anchor="middle" font-size="15" font-weight="800" fill="#1f2937">テスト</text>
+        <text x="715" y="165" text-anchor="middle" font-size="11.5" fill="#6b7280">devデプロイ→実行→結合</text>
+        <g transform="translate(690,180)">
+          <use href="#ic-refresh2" width="22" height="22" color="#0d9488"/>
+          <text x="30" y="16" font-size="12" font-weight="700" fill="#0d9488">× 2 実行</text>
+        </g>
+        <text x="715" y="228" text-anchor="middle" font-size="10.5" fill="#94a3b8">同じ結果になるかで</text>
+        <text x="715" y="252" text-anchor="middle" font-size="11" font-weight="700" fill="#0d9488">冪等性を実証</text>
+        <line x1="810" y1="190" x2="836" y2="190" stroke="#9aa7ba" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <!-- Stage D: リリース -->
+        <rect x="840" y="90" width="200" height="200" rx="14" fill="#fff" stroke="#4f46e5" stroke-width="2.2"/>
+        <text x="940" y="112" text-anchor="middle" font-size="11.5" font-weight="700" fill="#8b90a3" letter-spacing="0.04em">リリース</text>
+        <line x1="850" y1="190" x2="1030" y2="190" stroke="#e3e8ef" stroke-width="1.4"/>
+        <text x="940" y="148" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2937">staging</text>
+        <text x="940" y="167" text-anchor="middle" font-size="11" fill="#6b7280">自動デプロイ・検証</text>
+        <text x="940" y="228" text-anchor="middle" font-size="14" font-weight="800" fill="#1f2937">production</text>
+        <use href="#ic-person" x="905" y="240" width="16" height="16" color="#4f46e5"/>
+        <text x="948" y="253" text-anchor="middle" font-size="11" font-weight="700" fill="#4f46e5">人の承認 → デプロイ</text>
+      </svg>
+    </div>
+    <p class="diagram-caption">設計書チェック（IRR）とproduction承認だけが人の判断ポイント。それ以外はノンストップで進む。</p>
+  </section>
+
+  <!-- ============ 3層構造 ============ -->
+  <section>
+    <div class="section-head">
+      <div class="kicker">Architecture</div>
+      <h2>3層構造でエージェントを迷わせない</h2>
+      <p>「誰が」「どうやるか」「機械的にどう守るか」を分離しているから、各エージェントは薄いまま保たれ、無関係な情報でコンテキストを圧迫しません。</p>
+    </div>
+    <div class="layer-list">
+      <div class="layer-row agents">
+        <div class="layer-icon"><svg width="24" height="24"><use href="#ic-branch"/></svg></div>
+        <div class="layer-text">
+          <div class="t">Agents（誰が）</div>
+          <div class="d">フェーズごとの人格・ツール権限・引き継ぎ先。design-critic / task-worker / reviewer は独立コンテキストのサブエージェント。</div>
+        </div>
+        <div class="layer-path mono">.github/agents/*.agent.md</div>
+      </div>
+      <div class="layer-row skills">
+        <div class="layer-icon"><svg width="24" height="24"><use href="#ic-doc"/></svg></div>
+        <div class="layer-text">
+          <div class="t">Skills（どうやるか）</div>
+          <div class="d">IRR判定・テスト設計・デプロイ手順などの部品。使う場面が来るまで本文を読み込まない「段階的開示」でトークンを節約。</div>
+        </div>
+        <div class="layer-path mono">.github/skills/*/SKILL.md</div>
+      </div>
+      <div class="layer-row hooks">
+        <div class="layer-icon"><svg width="24" height="24"><use href="#ic-shield"/></svg></div>
+        <div class="layer-text">
+          <div class="t">Hooks（機械的にどう守るか）</div>
+          <div class="d">モデルを介さないシェル実行。prod操作をask確認、ハーネス設定の無断編集をdeny、ゲート状態を毎セッション自動注入。</div>
+        </div>
+        <div class="layer-path mono">.github/hooks/*.json</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 特徴グリッド ============ -->
+  <section>
+    <div class="section-head">
+      <div class="kicker">Design considerations</div>
+      <h2>考え抜かれた10の工夫</h2>
+      <p>機能を並べただけでは終わらない。実際に運用したときに壊れないための工夫を積み重ねている。</p>
+    </div>
+    <div class="feature-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="20" height="20"><use href="#ic-shield"/></svg></div>
+        <div class="feature-num">01</div>
+        <h4>設計書チェックが最初の関門</h4>
+        <p>IRRがGO / CONDITIONAL GO / NO-GOを判定。機械可読マーカーとしてセッション開始のたびに自動注入され、NO-GOの間は実装コードに触れない。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--teal-soft);color:var(--teal)"><svg width="20" height="20"><use href="#ic-eye"/></svg></div>
+        <div class="feature-num">02</div>
+        <h4>独立レビューでバイアス除去</h4>
+        <p>design-critic（設計書）とreviewer（コード）は実装者と地続きにしない、まっさらなコンテキストで起動。自己承認バイアスを構造的に防ぐ。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--indigo-soft);color:var(--indigo)"><svg width="20" height="20"><use href="#ic-shield"/></svg></div>
+        <div class="feature-num">03</div>
+        <h4>本番保護の三重化</h4>
+        <p>Hooks（staging/prod操作をask）× GitHub Environments（required reviewers）× Databricks権限分離（devに書き込み権限なし）。1つが効かなくても止まる。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--teal-soft);color:var(--teal)"><svg width="20" height="20"><use href="#ic-refresh2"/></svg></div>
+        <div class="feature-num">04</div>
+        <h4>冪等性を「証明」してから合格</h4>
+        <p>同じJobを同じパラメータで2回実行し、結果が変わらないことを確認して初めてテスト合格。単体テストのassertが通るだけでは終わらせない。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="20" height="20"><use href="#ic-branch"/></svg></div>
+        <div class="feature-num">05</div>
+        <h4>サブエージェントでコンテキストを分離</h4>
+        <p>1タスク＝1回の独立コンテキスト実行。長い会話ほど精度が落ちる"context rot"を避けつつ、コーディネーター自身の会話は軽いまま。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--indigo-soft);color:var(--indigo)"><svg width="20" height="20"><use href="#ic-diff"/></svg></div>
+        <div class="feature-num">06</div>
+        <h4>差分駆動の保守</h4>
+        <p>バグ修正は再現テストだけで完結し、全体の再チェックはしない。影響範囲はトレーサビリティ表から機械的に辿る。トークンを無駄にしない。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--teal-soft);color:var(--teal)"><svg width="20" height="20"><use href="#ic-loop"/></svg></div>
+        <div class="feature-num">07</div>
+        <h4>使うほど賢くなる成長ループ</h4>
+        <svg class="loop-mini" viewBox="0 0 220 70" width="100%" height="60">
+          <circle cx="30" cy="35" r="22" fill="#fff1ea" stroke="#ff6a3d" stroke-width="1.6"/>
+          <text x="30" y="39" text-anchor="middle" font-size="9.5" font-weight="700" fill="#c2410c">教訓</text>
+          <circle cx="110" cy="35" r="22" fill="#e6f7f5" stroke="#0d9488" stroke-width="1.6"/>
+          <text x="110" y="39" text-anchor="middle" font-size="9.5" font-weight="700" fill="#0d6e63">振り返り</text>
+          <circle cx="190" cy="35" r="22" fill="#edecfe" stroke="#4f46e5" stroke-width="1.6"/>
+          <text x="190" y="39" text-anchor="middle" font-size="9" font-weight="700" fill="#4338ca">DECISIONS</text>
+          <path d="M52 35H88" stroke="#9aa7ba" stroke-width="1.6" marker-end="url(#arrow)"/>
+          <path d="M132 35H168" stroke="#9aa7ba" stroke-width="1.6" marker-end="url(#arrow)"/>
+          <path d="M190 13C190 -6 30 -6 30 13" fill="none" stroke="#9aa7ba" stroke-width="1.3" stroke-dasharray="3 4" marker-end="url(#arrow)"/>
+        </svg>
+        <p>試行錯誤で確立した実行方法・振り返りの改善提案が、次のプロジェクトの初期状態に資産化される。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="20" height="20"><use href="#ic-compass"/></svg></div>
+        <div class="feature-num">08</div>
+        <h4>エージェントが使い方まで案内</h4>
+        <p>次の一手・新チャットに切り替えるタイミング・正しい入口を、エージェント自身が提案する。操作手順の暗記を前提にしない。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--indigo-soft);color:var(--indigo)"><svg width="20" height="20"><use href="#ic-scale"/></svg></div>
+        <div class="feature-num">09</div>
+        <h4>コストを見て使い分けるモデル選択</h4>
+        <p>高頻度・機械的な作業は軽量モデル、設計判断や独立レビューだけ高性能モデル。Skillの段階的開示とあわせてトークン消費を抑える。</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:var(--teal-soft);color:var(--teal)"><svg width="20" height="20"><use href="#ic-stack"/></svg></div>
+        <div class="feature-num">10</div>
+        <h4>操作はCLI、知識はAI Dev Kit</h4>
+        <p>Databricks CLI + Asset Bundlesを操作の正とし（Hooksで検査できるため）、AI Dev Kit/MCPは構文知識とワークスペース調査に専念させる役割分担。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 適用範囲 ============ -->
+  <section>
+    <div class="section-head">
+      <div class="kicker">Scope</div>
+      <h2>向いているプロジェクト・向いていないプロジェクト</h2>
+      <p>固定費（設計登録＋IRRで数時間）と1タスクごとの儀式コストは、無人で本番稼働するJobで初めて回収できる。対象外に使うと明確に過剰。</p>
+    </div>
+    <div class="scope-grid">
+      <div class="scope-card yes">
+        <h3><svg width="18" height="18"><use href="#ic-check"/></svg>使うべき場面</h3>
+        <ul>
+          <li>本番スケジュールで無人実行されるJob</li>
+          <li>複数人・長期保守が前提の開発</li>
+          <li>監査要件・証跡が求められる環境</li>
+        </ul>
+      </div>
+      <div class="scope-card no">
+        <h3><svg width="18" height="18"><use href="#ic-x"/></svg>使わなくてよい場面</h3>
+        <ul>
+          <li>使い捨ての分析ノートブック・アドホック処理</li>
+          <li>PoC・技術検証（本番化が決まってから載せ替える）</li>
+          <li>1人で完結し、記録を残す必要のない小さな作業</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 読み進め方 ============ -->
+  <section>
+    <div class="section-head">
+      <div class="kicker">Next</div>
+      <h2>次に読むもの</h2>
+    </div>
+    <div class="roadmap">
+      <div class="road-step current">
+        <div class="n">1</div>
+        <h4>この資料（概要）</h4>
+        <p>全体像と工夫のポイントをつかむ。今ここ。</p>
+      </div>
+      <div class="road-arrow"><svg width="20" height="20"><use href="#ic-diff"/></svg></div>
+      <div class="road-step">
+        <div class="n">2</div>
+        <h4>README.md</h4>
+        <p>ディレクトリ構成・フェーズ対応表・設計方針の全体構造。</p>
+      </div>
+      <div class="road-arrow"><svg width="20" height="20"><use href="#ic-diff"/></svg></div>
+      <div class="road-step">
+        <div class="n">3</div>
+        <h4>USAGE.md</h4>
+        <p>セットアップから実際のプロンプト実行までの具体的な手順。</p>
+      </div>
+      <div class="road-arrow"><svg width="20" height="20"><use href="#ic-diff"/></svg></div>
+      <div class="road-step">
+        <div class="n">4</div>
+        <h4>DECISIONS.md</h4>
+        <p>なぜこの設計にしたか。改修前に必ず目を通す判断の記録。</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  databricks-job-dev-harness — GitHub Copilot / VS Code 向け Databricks Job 開発ハーネス
+</footer>
+
+</body>
+</html>

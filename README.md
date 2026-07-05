@@ -1,5 +1,9 @@
 # Databricks Job 開発ハーネス — GitHub Copilot用
 
+> **はじめての方へ**: まず [OVERVIEW.html](OVERVIEW.html) をブラウザで開いて、
+> このハーネスが何をするツールで、どんな工夫があるかの概要をつかんでください。
+> このREADMEとUSAGE.mdは、概要を把握したあとに読む詳細資料です。
+
 VS Code + GitHub Copilot で、Databricks Job（Lakeflow Jobs）の
 「設計書チェック → 実装計画 → 実装 → テスト → デプロイ/リリース」を
 一気通貫でオーケストレーションするための **Databricks特化テンプレート** です。
