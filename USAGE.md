@@ -46,8 +46,29 @@ databricks bundle validate -t dev
      Job実行状態のChat内調査（MCP）。導入すると実装・テスト失敗調査の往復が大きく減る。
    - ハーネスに同梱していないのは更新が速く焼き込むと陳腐化するため（DECISIONS D-009）。
      組織ポリシー等で導入できない場合は、その旨を `environment.md` のAIツール構成に記録する。
-5. GitHub Copilot Chat にサインインし、Chatビューのagentセレクタに
-   `orchestrator` 等が表示されることを確認する。
+5. 使うツールに応じてセットアップする。
+
+   - **GitHub Copilot (VS Code)**: Copilot Chatにサインインし、Chatビューのagent
+     セレクタに `orchestrator` 等が表示されることを確認する。追加設定は不要
+     （`.github/agents`, `.github/prompts` 等をネイティブに検出する）。
+   - **Claude Code**: `.claude/`, `CLAUDE.md` は `.github/` から自動生成済み
+     （配布ZIP/テンプレートに含まれる）。プロジェクト名リネーム等で `.github/` 側を
+     変更したら、変更を反映するために再生成する。
+
+     ```bash
+     uv run task gen-tooling
+     ```
+
+     `claude` を起動し `/00-start-project` のようにスラッシュコマンドを実行する。
+     `.claude/settings.json` のHooksは `bash` シェルを前提にしている
+     （Windowsでgit-bash/WSLが無い場合は `.ps1` 版への読み替えが必要。README「既知の制約」参照）。
+   - **Antigravity**: `AGENTS.md` をプロジェクトルートから自動で読み込むため追加設定は
+     基本的に不要。`.agent/workflows/` は同様に自動生成済み。`GEMINI.md` に記載の
+     Terminal Permission Modeを **"Off"（許可リストのみ）または "Manual"** に設定し、
+     `databricks bundle deploy/run -t staging|prod`・`bundle destroy`・
+     `git push --force` 等を許可リストに入れないこと（本番保護の代替手段。詳細はGEMINI.md）。
+     独立レビュー（design-critic/reviewer相当）はManager Surfaceで新しいエージェント
+     セッションを開き、対応する `.agent/workflows/` の内容を渡して手動実行する。
 6. （CI/CDを使う場合）GitHubリポジトリに `staging` / `production` Environmentsを作成し、
    `production` にrequired reviewersを設定する。各Environmentに `DATABRICKS_HOST` /
    `DATABRICKS_CLIENT_ID` 変数を登録し、Databricks側でservice principalの

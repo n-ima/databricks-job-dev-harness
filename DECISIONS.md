@@ -264,3 +264,59 @@
   （ユーザー指摘）。等価性を設計ルールにすれば、どの経路でも同じ動作になり、
   経路の違いは「履歴を引き継ぐか（コスト）」だけになる。implement→test の
   `send: true` は全自動区間の設計意図どおりのため維持。
+
+## D-024: Claude Code / Antigravity対応（自動生成による単一ソース化）
+
+- **判断**: `.github/agents/`, `.github/prompts/`, `.github/skills/`, `.github/hooks/`,
+  `AGENTS.md` を唯一の正としたまま、GitHub Copilotに加えてClaude CodeとAntigravityにも
+  対応させる。ツール固有の設定は手で三重に書かず、`scripts/generate_agent_tooling.py`
+  （stdlibのみ、依存追加なし）で自動生成する。生成物はコミット対象とし、`uv run task
+  gen-tooling-check` をCIに追加してドリフト（3ツール間の内容の食い違い）を検出する。
+  - **Claude Code**: `CLAUDE.md` に `@AGENTS.md` インポートを1行書くだけ（Claude Codeは
+    2026年7月時点でAGENTS.mdをネイティブサポートしていないため。GitHub issueで要望済みだが
+    未実装）。真のサブエージェント（design-critic, task-worker, reviewer）は
+    `.claude/agents/*.md` として生成する（frontmatterの`tools`をCopilot短縮名から
+    Claude Codeのツール名（Read/Edit/Write/Grep/Glob/Bash/TodoWrite/Task等）へ
+    マッピング）。一方フェーズの「人格」エージェント（orchestrator/design-gate/
+    implement/test/release）はClaude Codeに main thread のペルソナ切替に相当する機能が
+    ないため、`.claude/commands/*.md`（スラッシュコマンド）の本文に該当
+    `.agent.md` の全文を埋め込み、実行した瞬間にそのエージェントとして振る舞うよう
+    指示する形で代替した。Agent Skills（SKILL.md）はGitHub CopilotとClaude Codeで
+    **同一のオープン標準**（frontmatterに`name`/`description`必須という共通仕様）と
+    確認できたため、`.github/skills/`から`.claude/skills/`へ変換なしでコピーする。
+    Hooksは`.claude/settings.json`のJSON構造がCopilotと異なる（`matcher`+`hooks`配列の
+    入れ子）が、フックスクリプト自体（`.github/hooks/scripts/*.sh`）のstdin/stdout
+    契約（`tool_input.file_path`等の読み取り、`hookSpecificOutput.permissionDecision`
+    の出力）は共通と確認できたため、**スクリプトは1つのまま、JSONマニフェストだけ
+    ツールごとに用意**する設計にした。
+  - **Antigravity**: `AGENTS.md`をプロジェクトルートからネイティブに直接読む（追加設定
+    不要、確認済み）。`GEMINI.md`がAntigravity固有の上書き先として公式に用意されている
+    ため、そこにサブエージェント代替手順・Terminal Permission Mode推奨設定を記載した。
+    `.agent/workflows/*.md`はプレーンMarkdownの手順書という説明のみ確認できたため、
+    Claude Codeのcommand生成と同じ「エージェント人格を全文埋め込む」技法を流用して
+    生成した。
+  - **意図的に実装しなかったもの**: Antigravityは2026年Google I/Oで独自のSubagents/
+    Hooks機能が追加されたと発表されているが、本ハーネス作成時点で公式ドキュメント
+    （antigravity.google/docs/*）がJavaScript描画のサイトでWebFetchによる直接取得が
+    できず、正確な設定ファイル形式・フィールド名を一次情報で確認できなかった。
+    このハーネス自身の原則（IRR「`TODO`・未確認の情報を実装根拠にしない」、
+    D-009/D-014「AI Dev Kit等の速く変わる外部仕様は公式一次情報で確認してから
+    バージョン固定する」）に従い、**未検証のスキーマを推測で実装することはしなかった**。
+    代わりに確実に動作するAntigravityの既存機能（AGENTS.mdネイティブ読み込み、
+    GEMINI.md、ワークフロー、Terminal Permission Mode）で同等の目的
+    （独立レビュー・本番保護）を代替する運用を`GEMINI.md`に明記し、Antigravity公式の
+    Subagents/Hooksが安定・文書化された場合に生成対応を追加する旨をTODOとして残した。
+  - **ハーネス保護の拡張**: `guard-harness-config-edit.sh`/`.ps1`の保護対象パターンに
+    `CLAUDE.md`, `GEMINI.md`, `.claude/agents/`, `.claude/commands/`,
+    `.claude/settings.json`, `.agent/workflows/` を追加した（`.claude/skills/`は
+    `.github/skills/`のコピーで再生成のたび上書きされるため、既存の`.github/skills/`
+    除外方針と合わせて対象外にした）。`.claude/settings.json`の`permissions.deny`にも
+    同じパスパターンを二重の安全網として追加した（主たる強制はHooks、permissions.denyは
+    補助）。
+- **根拠**: 3ツールの設定を手で別々に保守すると、片方だけ更新されて食い違う事故が
+  必ず起きる（このハーネス自体がプロンプト/エージェント間の等価性で苦労した経緯が
+  D-023にある）。生成方式なら「`.github/`を直せば全ツールに伝播する」という単純な
+  運用原則ひとつで一貫性を保証できる。またAntigravityのように仕様がまだ流動的な
+  対象について、検証できない機能を実装したと称するのは、このハーネスが設計書に対して
+  求めている基準（推測で埋めない、TODOのまま実装根拠にしない）に自ら違反することに
+  なるため、確実な部分だけを実装し不確実な部分は明示的にTODO化した。

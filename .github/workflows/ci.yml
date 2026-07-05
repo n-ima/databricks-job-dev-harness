@@ -23,6 +23,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: uv sync --all-groups --locked
+      - run: uv run task gen-tooling-check
       - run: uv run ruff format --check .
       - run: uv run task lint
       - run: uv run task typecheck

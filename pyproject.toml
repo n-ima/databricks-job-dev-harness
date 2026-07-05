@@ -38,6 +38,11 @@ extend-exclude = [".venv", "dist", "build", "参考"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# 埋め込みJSON文字列(.claude/settings.json テンプレート)のパスを途中で
+# 改行すると可読性が落ちるため、この生成スクリプトのみ行長制限を除外する。
+"scripts/generate_agent_tooling.py" = ["E501"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true
@@ -50,5 +55,7 @@ lint = "ruff check ."
 typecheck = "mypy src"
 test = 'pytest -m "not integration"'
 integration = 'pytest -m "integration" --no-cov'
+gen-tooling = "python scripts/generate_agent_tooling.py"
+gen-tooling-check = "python scripts/generate_agent_tooling.py --check"
 check = "task format && task lint && task typecheck && task test"
 build = "uv build --wheel"
