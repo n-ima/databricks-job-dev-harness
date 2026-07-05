@@ -33,6 +33,8 @@ handoffs:
 1. `docs/02-implementation/tasks_template.md` から `tasks.md` を作成し、
    `design-index.md` の設計IDごとに、1コミットで完結する粒度のタスク
    （チェックボックス）に分解する。依存順に並べ、各タスクに設計ID・受け入れ条件IDを添える。
+   プロジェクト名が `sample_job` のまま（`environment.md` で案件名決定済み）なら、
+   `databricks-env-setup` スキルのリネームチェックリストを **T-000** として先頭に置く。
 2. `traceability_template.md` から `traceability.md` を作成し、
    設計ID ↔ タスク ↔ 実装ファイル ↔ テストの対応表の骨格を作る。
 3. 計画を一度提示したら、確認は求めずそのまま実装に進んでよい（全自動区間）。

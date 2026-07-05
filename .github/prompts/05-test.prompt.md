@@ -16,5 +16,5 @@ testエージェントの手順で進める。
    仕様判断が必要な場合のみ人に確認する。
 4. `test-report.md` に実行コマンド・run ID・実測値をまとめる。
 5. 最後に `runSubagent` で `reviewer` を1回呼び出し、結果を
-   `security-review-report.md` と `test-report.md` に記録してから、
-   問題なしならリリースフェーズへのハンドオフを自動送信する。
+   `security-review-report.md` と `test-report.md` に記録する。
+   問題なしならテスト完了を宣言し、新しいチャットでの `/06-release` 実行を推奨する。
