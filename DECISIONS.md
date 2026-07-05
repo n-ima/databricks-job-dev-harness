@@ -223,3 +223,28 @@
   かつ配布経路を通らないため配布手順の欠陥を検出できない。別プロジェクト方式は
   利用者と同じ道を通るドッグフーディングになり、テスト自体が配布検証を兼ねる。
   別リポジトリ化はCI/PRフローまで検証したい場合にのみ（privateで）作成すればよい。
+
+## D-022: E2E検証第1回（daily-sales-report-trial, 2026-07-05）の還流
+
+検証プロジェクトの振り返り（H-001〜H-006 + ユーザー観察）から適用した改善。
+
+- **最重要: 教訓ログのトリガー拡張（ユーザー観察起点）**。dev検証で試行錯誤の末に
+  確立したコマンド実行方法（CLIのPATH問題→Python経由等）が記録されず、別セッションの
+  stagingで同じ試行錯誤が再発した。仕組み（learnings.md + SessionStart注入）は機能して
+  いたが、トリガー条件が仕様系の教訓に偏り「実行方法の獲得知識」が記録対象と認識されて
+  いなかったのが原因。対応: AGENTS.md / learnings_template / harness-retrospective の
+  トリガーに「試行錯誤の末に確立した実行方法は成功コマンドをそのまま記録」
+  「セッション終了・引き継ぎ前に記録済みか確認」を追加し、test（記録する側）と
+  release（最初から使う側）のエージェントに明示した。
+- **H-001**: main.job.yml のserverless例を検証済みの形（`environment_key` +
+  `spec.client: "2"`）に更新し、実機制約確認の注意を追記。
+- **H-002**: IRRのDatabricks適合性に「compute選択が実機制約と一致することを
+  実ワークスペースで確認」を必須項目として追加（environment.md記載の鵜呑み禁止）。
+  ※ サーバレス専用ワークスペースにclassic設計のまま `GO` を出し実装で手戻りした実績。
+- **H-003/H-006**: databricks-job-testing に「Serverless SQL Warehouse cold startの
+  120秒ポーリング」「異常系は明示チェック（内部例外任せ禁止）」の落とし穴節を追加。
+  python.instructions / task-worker禁止事項にも異常系の明示チェックを追加。
+- **H-004**: databricks-env-setup に devリソース初期化節（schema/Volume/出力ディレクトリ/
+  テーブル/テストデータの冪等スクリプト化、Volume出力先は自動で作られない）を追加。
+- **H-005**: SQL直接連結の禁止を task-worker の禁止事項に前倒し
+  （reviewer検出では手戻りが大きい。実装時点で止める）。

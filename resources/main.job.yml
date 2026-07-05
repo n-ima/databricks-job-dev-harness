@@ -1,12 +1,15 @@
 # Jobリソース定義の雛形。1リソース1ファイルで resources/ 配下に置く。
 # schedule はIRRでtimezone・pause状態・SLA・同時実行・backfill方針が承認されてから追加する。
-# compute の選択(classic/serverless)はIRRの決定を使う。serverlessにする場合は
-# job_clusters と tasks[].job_cluster_key を削除し、代わりに以下を使う:
+# compute の選択(classic/serverless)はIRRの決定を使う。その際、environment.mdの記載
+# だけでなく実際のワークスペース制約(サーバレス専用か等)を実機確認すること。
+# serverless(サーバレス専用ワークスペース含む)にする場合は job_clusters と
+# tasks[].job_cluster_key を削除し、代わりに以下を使う(検証プロジェクトで動作確認済みの形。
+# specの書式はDatabricks側で更新されるため bundle validate と公式ドキュメントで確認する):
 #   environments:
-#     - environment_key: default
+#     - environment_key: serverless
 #       spec:
-#         environment_version: "3"
-#   tasks[].environment_key: default   # (python_wheel_taskはそのまま)
+#         client: "2"
+#   tasks[].environment_key: serverless   # (python_wheel_taskはそのまま)
 resources:
   jobs:
     main_job:

@@ -26,7 +26,9 @@ description: レビュー済み設計書がこのDatabricks Job開発方式(Bund
    - **要求・境界**: 入出力・データ型・主キー・重複/欠損/遅延データ、正常/異常/再実行の
      期待結果、受け入れ条件のID化、対象外の明示
    - **Databricks適合性**: JobのタスクDAG・依存・パラメータ・タイムアウト・再試行、
-     compute選択（classic/serverless・Runtime・node type・policy）、
+     compute選択（classic/serverless・Runtime・node type・policy）—
+     **environment.mdの記載を鵜呑みにせず、実機制約（サーバレス専用ワークスペース、
+     利用可能なnode type/policy）と一致するか実ワークスペースで確認する**、
      dev/staging/prodのcatalog/schema分離、Unity Catalogの所有者・実行主体・最小権限、
      データ量・SLA/SLO・コスト上限・スケジュール・タイムゾーン、
      冪等性・チェックポイント・部分失敗・バックフィル方式

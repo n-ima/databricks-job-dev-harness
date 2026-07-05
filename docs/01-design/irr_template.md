@@ -44,6 +44,8 @@
 
 - [ ] JobのタスクDAG、依存関係、パラメータ、タイムアウト、再試行方針が確定
 - [ ] classic/serverless、Runtime、node type、autoscaling、policyの選択が確定
+- [ ] 上記の選択が**実際のワークスペース制約と一致することを実機で確認した**
+      （サーバレス専用ワークスペースにclassic cluster設計、等の前提崩れがない）
 - [ ] dev/staging/prod の catalog、schema、外部接続先が分離されている
 - [ ] Unity Catalog の所有者、実行主体、最小権限、行列制御の要否が確定
 - [ ] データ量、SLA/SLO、コスト上限、同時実行、スケジュール、タイムゾーンが確定
