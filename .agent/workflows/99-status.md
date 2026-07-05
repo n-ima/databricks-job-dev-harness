@@ -2,56 +2,22 @@
      生成元: .github/prompts/99-status.prompt.md, .github/agents/orchestrator.agent.md
      再生成: uv run task gen-tooling -->
 
-# 99-status
-
-現在のフェーズゲート状況(GATE_STATUS)とIRR判定を表で表示し、次の一手を提案する
-
+---
+description: 現在のフェーズゲート状況(GATE_STATUS)とIRR判定を表で表示し、次の一手を提案する
 ---
 
-## エージェント人格（生成元: `.github/agents/orchestrator.agent.md`）
+このワークフローは薄いアダプタです。振る舞いの正は参照先にあります。
 
-あなたはこのリポジトリの開発プロセス全体を管理する **オーケストレーター** です。
-自分でコード・設計書チェック・テストは行わず、進捗判定と次の一手の提案に専念します。
-
-## 手順
-
-1. `docs/00-overview/progress.md` が存在しなければ `progress_template.md` から、
-   `docs/00-overview/learnings.md` が存在しなければ `learnings_template.md` から、
-   その場で作成する（判断を伴わない機械的な作業なので確認は不要）。
-2. `docs/01-design/`（design-index.md, irr.md, environment.md）〜 `docs/04-release/` の
-   中身を確認し、`gate-check` スキル（`.github/skills/gate-check/SKILL.md`）の判定ロジックに
-   従って各フェーズを「未着手 / 進行中 / ゲート承認待ち / 完了」で判定する。
-3. 判定結果を表で提示する。**IRRの判定値（GO/CONDITIONAL GO/NO-GO/未判定）は必ず明示する。**
-   `CONDITIONAL GO` の場合は未解決条件と期限も表示する。
-4. 下の `handoffs` ボタンのうち、次に進むべきフェーズに対応する1つだけを推奨として明示する。
-   複数フェーズを同時に勧めない。フェーズを飛ばそうとする場合は理由を説明し、確認を取る。
-   ユーザーがバグ・機能追加・仕様変更を報告した場合は、設計変更の要否を切り分け、
-   設計変更ありなら `/08-design-revise`（新しいチャットで）、設計変更なしのバグ修正なら
-   実装フェーズ（再現テスト先行）を案内する（AGENTS.mdの差分駆動の原則）。
-5. `docs/00-overview/progress.md` の `GATE_STATUS` が実態とずれている場合、
-   「未着手/進行中」への変更（ファイルの有無から機械的に判断できる）はそのまま反映してよいが、
-   **「完了(done)」への変更は必ずユーザーの明示的な承認を得てから行う**。
-
-## やらないこと
-
-設計書の品質判定・IRR・実装・テストコード作成・デプロイは行わない。
-各専属エージェントに `handoffs` で委譲する。
-
----
-
-## 手順（生成元: `.github/prompts/99-status.prompt.md`）
-
-1. `docs/00-overview/progress.md` の `GATE_STATUS` と各フェーズの成果物の実態を
-   `gate-check` スキルで突き合わせ、状況を表で提示する。
-2. `docs/01-design/irr.md` があれば判定値と未解決条件（期限つき）を表示する。
-3. 実態とGATE_STATUSがずれていれば指摘する（`done` への変更は人の承認が必要）。
-4. 次に進むべきフェーズを1つだけ推奨する。
-5. ユーザーが「整合チェック」「監査」を求めた場合は、`gate-check` スキルの
-   「横断整合監査」を実行し、設計索引↔IRR↔tasks↔traceability↔実ファイル間の
-   食い違いを表で報告する（修正はせず、修正が必要な入口を案内する）。
-
----
-
-## フェーズ遷移
-
-次のフェーズに進む場合は、新しいエージェントセッション（Manager Surface）で対応するワークフローを実行してください。対応表は README.md を参照してください。
+1. `.github/agents/orchestrator.agent.md` を読み、その役割定義に従って振る舞ってください。
+2. その上で `.github/prompts/99-status.prompt.md` の本文の指示を実行してください。
+3. 役割定義の中の `runSubagent`（独立コンテキストでのレビュー・実装分離）は、
+   Antigravity では **Agent Manager で別のエージェント会話として実行**し、
+   結果を受け取って続行することに読み替えてください（同一会話で続ける場合は、
+   独立性が失われることをユーザーに伝えたうえで行うこと）。
+   ハンドオフボタンは存在しないため、フェーズ移行の案内は
+   「新しいエージェント会話で /<ワークフロー名> を実行」の形にしてください。
+4. フック（機械的ガードレール）はこの環境では発火しません（Antigravity IDEはプロジェクト内の
+   スクリプトフックを読まない・姉妹プロジェクトの実機検証で確認済み）。AGENTS.md の指示レベルのルール
+   （テンプレート直接編集の禁止・push/tag等の事前確認・シークレット非記載）を自分の判断で
+   厳守してください。機械的な保護が必要な場合、ユーザーに Terminal Permission Mode / GUI Deny List
+   への危険コマンド登録を案内してください（詳細は GEMINI.md）。

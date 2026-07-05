@@ -1,55 +1,14 @@
+<!-- GENERATED FILE。編集しないでください。
+     生成元: .github/skills/gate-check/SKILL.md
+     再生成: uv run task gen-tooling -->
+
 ---
 name: gate-check
 description: docs/00-overview/progress.md のGATE_STATUS(design_check/implementation/test/release)を判定・更新する手順。IRRの判定値と連動させる。オーケストレーターや各フェーズエージェントが進捗確認・更新するときに使う。
 ---
 
-# ゲート判定スキル
+# gate-check（ポインタ）
 
-## 状態の正
-
-`docs/00-overview/progress.md` の先頭にある機械可読ブロックが正。人間向けの表と
-必ず一致させる。
-
-```
-<!-- GATE_STATUS
-design_check: not_started | in_progress | pending_approval | done
-implementation: not_started | in_progress | pending_approval | done
-test: not_started | in_progress | pending_approval | done
-release: not_started | in_progress | pending_approval | done
--->
-```
-
-## 判定手順
-
-1. `docs/00-overview/progress.md` が無ければ `progress_template.md` から作成する。
-2. 各フェーズについて、対応する成果物ファイルの有無・内容から実態を推測する。
-   - design_check: `docs/01-design/design-index.md` が無ければ `not_started`。
-     索引・`environment.md` があれば `in_progress`。`irr.md` の判定が
-     `GO`/`CONDITIONAL GO` で承認記録があり、ユーザー承認を得ていれば `done`。
-     **`NO-GO` は `done` にできない。**
-   - implementation: `docs/02-implementation/tasks.md`（全チェックボックス完了で `done`）
-   - test: `docs/03-test/test-report.md`（独立レビュー結果の記載があって `done`）
-   - release: `docs/04-release/release-checklist.md`（production承認記録があって `done`）
-3. GATE_STATUSブロックと実態がずれていれば、ユーザーに更新してよいか確認してから書き換える
-   （エージェントが黙って `done` にしない。ユーザーの明示的な承認発言があって初めて
-   `done` にする）。「未着手/進行中」への修正は機械的に判断できるため確認不要。
-4. `design_check` が `done` でない間は、implementation以降のフェーズを開始しない
-   （`AGENTS.md` の「IRRが未判定またはNO-GOの間、プロダクションコードを実装しない」に対応）。
-5. **リリース後の改修サイクル**: 改修の起点に応じて該当フェーズを `in_progress` へ戻す
-   （設計変更あり→ `design_check` から / 設計変更なしのバグ修正→ `implementation` から）。
-   戻すのは該当フェーズ以降のみで、前段のフェーズは `done` のまま維持する。
-   改修理由と対象設計IDを `progress.md` の申し送りに1行記録する。
-
-## 横断整合監査（ユーザーが「整合チェック」「監査」を求めたとき）
-
-フェーズ判定より深い、成果物間の食い違いの検出。改修が数回重なった後や
-リリース前の最終確認に有効。次を突き合わせ、食い違いを表で報告する（修正はしない）。
-
-1. `design-index.md` の設計ID・版 ↔ `irr.md` に記載の版（IRRが古い版を見ていないか）
-2. `design-index.md` の「実装乖離あり」状態 ↔ 解消期限切れがないか
-3. `tasks.md` の全タスク ↔ `traceability.md` の行（対応漏れ・テスト欄が空の行）
-4. `traceability.md` の実装ファイル・テスト ↔ 実在するか（削除・リネーム漏れ）
-5. `GATE_STATUS` ↔ 各成果物の実態（通常判定と同じ）
-6. `CONDITIONAL GO` の条件 ↔ `tasks.md` 上の追跡タスクの有無と期限
-5. `.github/hooks/scripts/` のゲート系フックはこのGATE_STATUSブロックを直接パースするため、
-   フォーマット（インデント・キー名）を崩さない。
+このスキルの手順の正典は `.github/skills/gate-check/SKILL.md` にある。
+それを読み、記載された手順を忠実に実行すること。手順を編集する場合も正典側を直す
+（このファイルはClaude Codeが `.claude/skills/` しか探索しないために置いてある薄いポインタである）。

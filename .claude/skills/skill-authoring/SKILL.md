@@ -1,45 +1,14 @@
+<!-- GENERATED FILE。編集しないでください。
+     生成元: .github/skills/skill-authoring/SKILL.md
+     再生成: uv run task gen-tooling -->
+
 ---
 name: skill-authoring
 description: 新しいAgent Skillを作成・追加する手順とフォーマット規約。プロジェクト固有の手順(特殊なデプロイ先・組織固有チェック等)をSkill化して再利用可能にするときに使う。
 ---
 
-# Skill作成スキル
+# skill-authoring（ポインタ）
 
-## 作る前に確認すること
-
-1. **既存のSkillで足りないか**: このリポジトリの `.github/skills/` と、導入済みの
-   Databricks公式Agent Skills（`aitools`）を確認する。重複するSkillを作らない。
-2. **公式・コミュニティ製がないか**: `github/awesome-copilot` や公式ドキュメントに
-   該当Skillがあれば、ゼロから書かずに取り込む/参照する方を優先する。
-3. **Skillにすべき内容か**: 2回以上使う手順・チェックリストならSkill。
-   1回きりの情報は `docs/` へ、プロジェクト固有の暗黙知は `learnings.md` へ。
-
-## フォーマット
-
-`.github/skills/<skill-name>/SKILL.md` に置く。
-
-```markdown
----
-name: <kebab-case、ディレクトリ名と一致>
-description: <いつ・何のために使うかをキーワード立てて具体的に。曖昧だと段階的開示が機能しない>
----
-
-# タイトル
-
-（手順・チェックリスト本文。500行以内。長くなるなら分割する）
-```
-
-## 書き方の規約
-
-- `description` が最重要。エージェントは `name`/`description` だけで読み込み判断をする
-  （本文は関連するときだけ読み込まれる）。「〜のときに使う」を必ず含める。
-- 手順は番号付きリスト、判断基準は表にする。散文で長く書かない。
-- 実行コマンドは具体的に書く（コピーして動く形）。
-- 案件固有の値（catalog名・URL等）をSkillに書かない。`environment.md` への参照にする
-  （Skillはプロジェクトを跨いで再利用されるため）。
-- 危険な操作を含む場合、Hooksで確認が入ること・人の承認が要ることを本文に明記する。
-
-## 追加後
-
-- ハーネス本体に還流する価値があるSkill（他プロジェクトでも使える）は、
-  振り返り時に改善提案として報告する（`harness-retrospective` スキル参照）。
+このスキルの手順の正典は `.github/skills/skill-authoring/SKILL.md` にある。
+それを読み、記載された手順を忠実に実行すること。手順を編集する場合も正典側を直す
+（このファイルはClaude Codeが `.claude/skills/` しか探索しないために置いてある薄いポインタである）。

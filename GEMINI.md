@@ -30,8 +30,9 @@ Antigravity公式のSubagents/Hooks機能が安定・文書化された場合は
 
 ## 本番保護（Hooksの代替）
 
-Antigravityには（本ハーネス作成時点で確認できた範囲では）GitHub Copilot/Claude Codeの
-ような、コマンド内容を見てdeny/askを機械的に返すスクリプト式Hooksに相当する機能はない。
+Antigravity IDEはプロジェクト内のスクリプトフックを読まない（姉妹プロジェクト
+CreateApplの実機検証で確認済み）。そのためGitHub Copilot/Claude Codeのような、
+コマンド内容を見てdeny/askを機械的に返すスクリプト式Hooksに相当する機能は使えない。
 代わりにTerminal Permission Mode（Off/Manual/Auto）とsettings.jsonの許可リストで
 保護する。**このハーネスでは "Off（許可リストのみ）" または "Manual（実行前に確認）"
 を推奨する。** 特に以下のパターンは許可リストに入れない（`guard-databricks-prod.sh`

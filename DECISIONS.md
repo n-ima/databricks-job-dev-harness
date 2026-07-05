@@ -320,3 +320,39 @@
   対象について、検証できない機能を実装したと称するのは、このハーネスが設計書に対して
   求めている基準（推測で埋めない、TODOのまま実装根拠にしない）に自ら違反することに
   なるため、確実な部分だけを実装し不確実な部分は明示的にTODO化した。
+
+## D-025: .claude/.agent生成をハイブリッド方式(frontmatter生成+本文は参照ポインタ)へ変更
+
+- **経緯**: D-024で構築した生成方式（`.github/agents/*.agent.md`等の全文を`.claude/commands/`
+  `.agent/workflows/`へ埋め込む）について、ユーザーが並行して整備していた別プロジェクト
+  `D:\vscode-worspace\ai-manager`（マルチエージェント対応の独立実装）と、それを参考に
+  ユーザーがマルチエージェント対応させた`D:\vscode-worspace\CreateAppl`（本ハーネスの
+  派生元）を比較する機会があった。両者は`.claude/commands/*.md`・`.agent/workflows/*.md`・
+  `.claude/skills/*/SKILL.md`の本文を**全文コピーではなく「正典を読んで実行せよ」という
+  数行の参照ポインタのみ**にしていた（例: CreateAppl `.claude/commands/03-design-architecture.md`
+  は8行、`.github/agents/design.agent.md`を読んで従うよう指示するだけ）。
+- **判断**: 本ハーネスもポインタ方式に切り替える。ただし**frontmatter
+  （name/description/tools/allowed-tools）の自動生成とCI検証（`gen-tooling-check`）は維持する**。
+  `scripts/generate_agent_tooling.py`の`gen_claude_subagents`/`gen_claude_commands`/
+  `gen_claude_skills`/`gen_antigravity_workflows`を、全文埋め込みから
+  「frontmatter生成＋固定テンプレートの参照ポインタ本文」に書き換えた。
+  生成ファイルは平均130行前後→15〜25行程度に縮小した。
+- **根拠（ハイブリッドにした理由）**: ポインタ方式は「本文（手順・ペルソナ）を編集しても
+  再生成を忘れるリスクが構造的に無い」という明確な優位性がある（全文埋め込み方式は
+  編集のたびに`gen-tooling`再実行が必要で、CIの`--check`はpushするまで気づけない）。
+  一方でai-manager/CreateAppl双方とも、(a) frontmatter（特にdescription）の変更は
+  手動転記に頼っており自動検証が無い、(b) Skill/Promptを追加・削除したときの
+  対応ポインタファイルの作成漏れを検知する仕組みが無い、という弱点を抱えていた。
+  本ハーネスの生成スクリプトはCopilotのtools短縮名→Claude Codeツール名への変換が
+  そもそも必要（frontmatterは実行時参照に委譲できない、ツール自体がモデル呼び出し前に
+  静的パースするメタデータのため）なので、この自動変換ロジックと`--check`によるCI検証は
+  そのまま活かし、本文だけポインタ化するのが両者の弱点を打ち消し合う設計になる。
+- **副次的な収穫**: CreateApplの`.agent/workflows/`アダプタには「Antigravity IDEは
+  プロジェクト内のスクリプトフックを読まない」という**実機検証済み**の記述があった。
+  自分はAntigravity公式ドキュメントがJS描画サイトで一次情報を確認できず「要確認」と
+  保留していたが、姉妹プロジェクトの実機検証という裏付けが取れたため、`GEMINI.md`と
+  生成スクリプトの`.agent/workflows/*.md`アダプタ本文をより確信度の高い書き方に更新した
+  （Antigravity独自のSubagents/Hooks機能自体のスキーマは依然未検証のまま。D-024参照）。
+- **今後の運用**: `.github/`側の本文編集は再生成不要（常に最新が実行時に読まれる）。
+  frontmatter変更、またはSkill/Promptの追加・削除をしたときだけ
+  `uv run task gen-tooling`を実行する。判断に迷う場合は常に実行して`--check`で確認すればよい。

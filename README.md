@@ -47,15 +47,20 @@ VS Code + GitHub Copilot / Claude Code / Antigravity で、Databricks Job
 
 唯一の正は `.github/agents/`, `.github/prompts/`, `.github/skills/`, `.github/hooks/`,
 `AGENTS.md`。ツール固有の設定はここから `scripts/generate_agent_tooling.py` で自動生成し、
-3ツール間の内容の食い違い（ドリフト）を構造的に防いでいる。
+3ツール間の内容の食い違い（ドリフト）を構造的に防いでいる。生成物は**薄いポインタ**
+（「正典を読んで実行せよ」という短い指示のみ。全文コピーはしない）なので、手順・ペルソナの
+本文を編集しただけなら再生成しなくても常に最新が実行時に読まれる。再生成が要るのは
+frontmatter（description/tools等）の変更、またはSkill/Promptの追加・削除のときだけ
+（姉妹プロジェクトCreateAppl/ai-managerの実装を参考にした設計。詳細はDECISIONS.md D-025）。
 
 | ツール | AGENTS.mdの読み込み | フェーズエージェント | サブエージェント独立レビュー | 本番保護 |
 |---|---|---|---|---|
 | GitHub Copilot (VS Code) | ネイティブ | `.github/agents/*.agent.md`（プロンプト実行で自動切替） | `runSubagent` | Hooks（`.github/hooks/`） |
-| Claude Code | `CLAUDE.md`から`@AGENTS.md`でインポート | `.claude/commands/*.md`（自動生成） | `.claude/agents/*.md`（自動生成、Taskツール） | `.claude/settings.json`のHooks（自動生成） |
-| Antigravity | ネイティブ（追加設定不要） | `.agent/workflows/*.md`（自動生成） | Manager Surfaceで手動起動 | Terminal Permission Mode（`GEMINI.md`参照） |
+| Claude Code | `CLAUDE.md`から`@AGENTS.md`でインポート | `.claude/commands/*.md`（薄いポインタ、自動生成） | `.claude/agents/*.md`（薄いポインタ、自動生成、Taskツール） | `.claude/settings.json`のHooks（自動生成） |
+| Antigravity | ネイティブ（追加設定不要） | `.agent/workflows/*.md`（薄いポインタ、自動生成） | Manager Surfaceで手動起動 | Terminal Permission Mode（`GEMINI.md`参照） |
 
-`.github/` 側を編集したら次を実行して同期する（生成物は直接編集しない。Hooksでdenyされる）。
+`.github/` 側でfrontmatterを変更した、またはSkill/Promptを追加・削除したら
+次を実行して同期する（生成物は直接編集しない。Hooksでdenyされる）。
 
 ```bash
 uv run task gen-tooling         # .claude/, .agent/, CLAUDE.md等を生成
