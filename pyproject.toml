@@ -15,7 +15,7 @@ main_job = "sample_job.main:main"
 [dependency-groups]
 dev = [
   "databricks-sdk>=0.85.0,<1",
-  "mypy>=1.16,<2",
+  "mypy>=2.2.0,<3",
   "pytest>=8.4,<9",
   "pytest-cov>=6.2,<7",
   "ruff>=0.12,<1",
